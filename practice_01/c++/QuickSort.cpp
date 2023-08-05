@@ -1,86 +1,101 @@
-// Quick sort in C++
-
 #include <iostream>
-#include<ctime>
-using namespace std;
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <ctime>
+#include <numeric>
+#include <cmath>
 
-// function to swap elements
+// función para intercambiar elementos
 void swap(int *a, int *b) {
   int t = *a;
   *a = *b;
   *b = t;
 }
 
-// function to print the array
-void printArray(int array[], int size) {
-  int i;
-  for (i = 0; i < size; i++)
-    cout << array[i] << " ";
-  cout << endl;
-}
-
-// function to rearrange array (find the partition point)
+// función para reorganizar el arreglo (encontrar el punto de partición)
 int partition(int array[], int low, int high) {
     
-  // select the rightmost element as pivot
-  int pivot = array[high];
+  // seleccionar el elemento más a la derecha como pivote
+  int pivote = array[high];
   
-  // pointer for greater element
+  // puntero para el elemento mayor
   int i = (low - 1);
 
-  // traverse each element of the array
-  // compare them with the pivot
+  // recorrer cada elemento del arreglo
+  // compararlos con el pivote
   for (int j = low; j < high; j++) {
-    if (array[j] <= pivot) {
+    if (array[j] <= pivote) {
         
-      // if element smaller than pivot is found
-      // swap it with the greater element pointed by i
+      // si se encuentra un elemento menor que el pivote
+      // intercambiarlo con el elemento mayor señalado por i
       i++;
       
-      // swap element at i with element at j
+      // intercambiar el elemento en i con el elemento en j
       swap(&array[i], &array[j]);
     }
   }
   
-  // swap pivot with the greater element at i
+  // intercambiar el pivote con el elemento mayor en i
   swap(&array[i + 1], &array[high]);
   
-  // return the partition point
+  // devolver el punto de partición
   return (i + 1);
 }
 
 void quickSort(int array[], int low, int high) {
   if (low < high) {
       
-    // find the pivot element such that
-    // elements smaller than pivot are on left of pivot
-    // elements greater than pivot are on righ of pivot
+    // encontrar el elemento pivote de modo que
+    // los elementos menores que el pivote estén a la izquierda del pivote
+    // los elementos mayores que el pivote estén a la derecha del pivote
     int pi = partition(array, low, high);
 
-    // recursive call on the left of pivot
+    // llamada recursiva a la izquierda del pivote
     quickSort(array, low, pi - 1);
 
-    // recursive call on the right of pivot
+    // llamada recursiva a la derecha del pivote
     quickSort(array, pi + 1, high);
   }
 }
 
-// Driver code
+
 int main() {
-  const int size = 100;
-  int data[size];
-	srand(time(0));
-  for(int i = 0; i < size; i++){
-  	data[i] =  (rand() % size);
-  }
-  int n = sizeof(data) / sizeof(data[0]);
-  
-  cout << "Unsorted Array: \n";
-  printArray(data, n);
-  
-  // perform quicksort on data
-  quickSort(data, 0, n - 1);
-  
-  cout << "Sorted array in ascending order: \n";
-  printArray(data, n);
+    std::vector<int> input_sizes = {100, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 20000, 30000, 40000, 50000};
+    int num_repeats = 5;
+
+    std::ofstream outputFile;
+    outputFile.open("quick_sort_times.txt");
+
+    for (int size : input_sizes) {
+        std::vector<double> times;
+
+        for (int i = 0; i < num_repeats; ++i) {
+            int data[size];
+            srand(time(0));
+            for (int j = 0; j < size; ++j) {
+                data[j] = rand() % size;
+            }
+
+            auto start_time = std::chrono::high_resolution_clock::now();
+            quickSort(data, 0, size - 1);
+            auto end_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed_time = end_time - start_time;
+            times.push_back(elapsed_time.count());
+        }
+
+        double avg_time = std::accumulate(times.begin(), times.end(), 0.0) / num_repeats;
+        double variance = 0.0;
+        for (double time : times) {
+            variance += std::pow(time - avg_time, 2);
+        }
+        double std_dev = std::sqrt(variance / num_repeats);
+
+        outputFile << size << "\t" << avg_time << "\t" << std_dev << "\n";
+    }
+
+    outputFile.close();
+
+    return 0;
 }

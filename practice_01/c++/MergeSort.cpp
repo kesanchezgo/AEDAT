@@ -1,91 +1,109 @@
-// Merge sort in C++
-
 #include <iostream>
-#include<ctime>
-using namespace std;
+#include <vector>
+#include <algorithm>
+#include <chrono>
+#include <fstream>
+#include <ctime>
+#include <numeric>
+#include <cmath>
 
-// Merge two subarrays L and M into arr
+// Fusiona dos subarreglos L y M en arr
 void merge(int arr[], int p, int q, int r) {
-  
-  // Create L ← A[p..q] and M ← A[q+1..r]
-  int n1 = q - p + 1;
-  int n2 = r - q;
+    // Crear L ← A[p..q] y M ← A[q+1..r]
+    int n1 = q - p + 1;
+    int n2 = r - q;
 
-  int L[n1], M[n2];
+    int L[n1], M[n2];
 
-  for (int i = 0; i < n1; i++)
-    L[i] = arr[p + i];
-  for (int j = 0; j < n2; j++)
-    M[j] = arr[q + 1 + j];
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[p + i];
+    for (int j = 0; j < n2; j++)
+        M[j] = arr[q + 1 + j];
 
-  // Maintain current index of sub-arrays and main array
-  int i, j, k;
-  i = 0;
-  j = 0;
-  k = p;
+    // Mantener el índice actual de los subarreglos y el arreglo principal
+    int i, j, k;
+    i = 0;
+    j = 0;
+    k = p;
 
-  // Until we reach either end of either L or M, pick larger among
-  // elements L and M and place them in the correct position at A[p..r]
-  while (i < n1 && j < n2) {
-    if (L[i] <= M[j]) {
-      arr[k] = L[i];
-      i++;
-    } else {
-      arr[k] = M[j];
-      j++;
+    // Hasta que alcancemos el final de L o M, seleccionamos el mayor entre
+    // los elementos de L y M y los colocamos en la posición correcta en A[p..r]
+    while (i < n1 && j < n2) {
+        if (L[i] <= M[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = M[j];
+            j++;
+        }
+        k++;
     }
-    k++;
-  }
 
-  // When we run out of elements in either L or M,
-  // pick up the remaining elements and put in A[p..r]
-  while (i < n1) {
-    arr[k] = L[i];
-    i++;
-    k++;
-  }
+    // Cuando nos quedamos sin elementos en L o M,
+    // recogemos los elementos restantes y los colocamos en A[p..r]
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
 
-  while (j < n2) {
-    arr[k] = M[j];
-    j++;
-    k++;
-  }
+    while (j < n2) {
+        arr[k] = M[j];
+        j++;
+        k++;
+    }
 }
 
-// Divide the array into two subarrays, sort them and merge them
+// Divide el arreglo en dos subarreglos, los ordena y los fusiona
 void mergeSort(int arr[], int l, int r) {
-  if (l < r) {
-    // m is the point where the array is divided into two subarrays
-    int m = l + (r - l) / 2;
+    if (l < r) {
+        // m es el punto donde el arreglo se divide en dos subarreglos
+        int m = l + (r - l) / 2;
 
-    mergeSort(arr, l, m);
-    mergeSort(arr, m + 1, r);
+        mergeSort(arr, l, m);
+        mergeSort(arr, m + 1, r);
 
-    // Merge the sorted subarrays
-    merge(arr, l, m, r);
-  }
+        // Fusiona los subarreglos ordenados
+        merge(arr, l, m, r);
+    }
 }
 
-// Print the array
-void printArray(int arr[], int size) {
-  for (int i = 0; i < size; i++)
-    cout << arr[i] << " ";
-  cout << endl;
-}
 
-// Driver program
 int main() {
-  const int size = 100;
-  int data[size];
-	srand(time(0));
-  for(int i = 0; i < size; i++){
-  	data[i] =  (rand() % size);
-  }
-  int len = sizeof(data) / sizeof(data[0]);
+    std::vector<int> input_sizes = {100, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 20000, 30000, 40000, 50000};
+    int num_repeats = 5;
 
-  mergeSort(data, 0, len - 1);
+    std::ofstream outputFile;
+    outputFile.open("merge_sort_times.txt");
 
-  cout << "Sorted array: \n";
-  printArray(data, len);
-  return 0;
+    for (int size : input_sizes) {
+        std::vector<double> times;
+
+        for (int i = 0; i < num_repeats; ++i) {
+            int data[size];
+            srand(time(0));
+            for (int j = 0; j < size; ++j) {
+                data[j] = rand() % size;
+            }
+
+            auto start_time = std::chrono::high_resolution_clock::now();
+            mergeSort(data, 0, size - 1);
+            auto end_time = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed_time = end_time - start_time;
+            times.push_back(elapsed_time.count());
+        }
+
+        double avg_time = std::accumulate(times.begin(), times.end(), 0.0) / num_repeats;
+        double variance = 0.0;
+        for (double time : times) {
+            variance += std::pow(time - avg_time, 2);
+        }
+        double std_dev = std::sqrt(variance / num_repeats);
+
+        outputFile << size << "\t" << avg_time << "\t" << std_dev << "\n";
+    }
+
+    outputFile.close();
+
+    return 0;
 }
