@@ -133,7 +133,13 @@ int main() {
     int k = 5; // Número de vecinos cercanos a buscar
     std::vector<Point> kNearest = tree.findKNearest(target, k);
 
-    std::cout << "Los " << k << " puntos más cercanos a (" << target.x << ", " << target.y << "):" << std::endl;
+    /* std::cout << "Los " << k << " puntos más cercanos a (" << target.x << ", " << target.y << "):" << std::endl;
+    for (const Point& nearest : kNearest) {
+        std::cout << "Latitud: " << nearest.x << ", Longitud: " << nearest.y << std::endl;
+    } */
+
+    std::cout << "Cantidad de temblores cercanos al Centro Historico de Arequipa (-16.409, -71.5375): " << kNearest.size() << std::endl;
+    std::cout << "Coordenadas de los " << k << " temblores mas cercanos:" << std::endl;
     for (const Point& nearest : kNearest) {
         std::cout << "Latitud: " << nearest.x << ", Longitud: " << nearest.y << std::endl;
     }
