@@ -4,6 +4,8 @@
 #include <limits>
 #include <algorithm>
 #include <random>
+#include <fstream>
+#include <chrono>
 
 struct Point {
     double x, y;
@@ -116,24 +118,29 @@ private:
 int main() {
     KDTree tree;
     // Generar datos de ejemplo para la ciudad de Arequipa
-    std::random_device rd;
-    std::mt19937 gen(rd());
+    //std::random_device rd;
+    //std::mt19937 gen(rd());
+    auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine gen(seed); // Usa el reloj del sistema como semilla
     std::uniform_real_distribution<> latDist(-16.5000, -16.1000); // Latitud de Arequipa
     std::uniform_real_distribution<> lonDist(-71.7000, -71.2000); // Longitud de Arequipa
-    std::uniform_real_distribution<> magDist(3.0, 7.0); //Magnitud aleatoria entre 3.0 y 7.0
+    std::uniform_real_distribution<> magDist(5, 9); //Magnitud aleatoria entre 3.0 y 7.0
 
-    int numPoints = 50; // Cantidad de puntos de ejemplo
+    int numPoints = 60; // Cantidad de puntos de ejemplo
+    std::ofstream outputFile("temblores.csv"); // Abre un archivo para escribir datos
+
     for (int i = 0; i < numPoints; ++i) {
         double lat = latDist(gen);
         double lon = lonDist(gen);
         double mag = magDist(gen);
         tree.insert(Point(lat, lon, mag));
+
     }
 
      // Definir el punto objetivo para la búsqueda de vecinos cercanos
     Point target(-16.409047, -71.537451, 0); // Utiliza una de las coordenadas de Arequipa como objetivo
 
-    int k = 5; // Número de vecinos cercanos a buscar
+    int k = 6; // Número de vecinos cercanos a buscar
     std::vector<Point> kNearest = tree.findKNearest(target, k);
 
     /* std::cout << "Los " << k << " puntos más cercanos a (" << target.x << ", " << target.y << "):" << std::endl;
@@ -143,9 +150,13 @@ int main() {
 
     std::cout << "Cantidad de temblores cercanos al Centro Historico de Arequipa (-16.409, -71.5375): " << kNearest.size() << std::endl;
     std::cout << "Coordenadas de los " << k << " temblores mas cercanos:" << std::endl;
+     outputFile << "Latitud" << "," << "Longitud" << "," << "Magnitud" << std::endl;
     for (const Point& nearest : kNearest) {
         std::cout << "Latitud: " << nearest.x << ", Longitud: " << nearest.y << ", Magnitud: " << nearest.m << std::endl;
+         // Escribe las coordenadas y la magnitud en el archivo
+        outputFile << nearest.x << "," << nearest.y << "," << nearest.m << std::endl;
     }
+    outputFile.close(); // Cierra el archivo
 
     return 0;
 }
