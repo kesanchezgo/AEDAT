@@ -124,9 +124,9 @@ int main() {
     std::default_random_engine gen(seed); // Usa el reloj del sistema como semilla
     std::uniform_real_distribution<> latDist(-16.5000, -16.1000); // Latitud de Arequipa
     std::uniform_real_distribution<> lonDist(-71.7000, -71.2000); // Longitud de Arequipa
-    std::uniform_real_distribution<> magDist(5, 9); //Magnitud aleatoria entre 3.0 y 7.0
+    std::uniform_real_distribution<> magDist(3, 9); //Magnitud aleatoria entre 3.0 y 7.0
 
-    int numPoints = 60; // Cantidad de puntos de ejemplo
+    int numPoints = 50; // Cantidad de puntos de ejemplo
     std::ofstream outputFile("temblores.csv"); // Abre un archivo para escribir datos
 
     for (int i = 0; i < numPoints; ++i) {
@@ -140,7 +140,7 @@ int main() {
      // Definir el punto objetivo para la búsqueda de vecinos cercanos
     Point target(-16.409047, -71.537451, 0); // Utiliza una de las coordenadas de Arequipa como objetivo
 
-    int k = 6; // Número de vecinos cercanos a buscar
+    int k = 5; // Número de vecinos cercanos a buscar
     std::vector<Point> kNearest = tree.findKNearest(target, k);
 
     /* std::cout << "Los " << k << " puntos más cercanos a (" << target.x << ", " << target.y << "):" << std::endl;
